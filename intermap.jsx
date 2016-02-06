@@ -57,6 +57,7 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                         width={this.state.width}
                         height={this.state.height}
                         margin={this.state.layoutMargin}
+                        selectedAs={this.state.srcHighlight}
                         onRadialViewportChange={this._onRadialViewportChange}
                     />
                 </div>

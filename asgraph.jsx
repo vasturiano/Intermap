@@ -5,9 +5,7 @@ define([
     'underscore',
     'cytoscape',
     'cytoscape-panzoom',
-    'cytoscape-qtip',
-    'visjs',
-    'sigma'
+    'cytoscape-qtip'
 ], function(React, ReactDOM, $, _, cytoscape, panzoom, qtip) {
 
     panzoom(cytoscape, $); // Register panzoom
@@ -32,7 +30,7 @@ define([
                 asn: nNodes,
                 customerConeSize: Math.random(),
                 lat: Math.random()*180 - 90,
-                long: Math.random()*360 - 180,
+                lon: Math.random()*360 - 180,
                 orgName: 'bla'
                 //x: Math.random(),
                 //y: Math.random()
@@ -143,6 +141,8 @@ define([
                 panDistance: 40 // max pan distance per tick
             });
 
+            //cs.qtip();
+
             function zoomOrPan() {
                 var pan = cs.pan();
                 props.onZoomOrPan(cs.zoom(), pan.x, pan.y);
@@ -214,7 +214,8 @@ define([
                 graphData: graphRandomGenerator(50, 100),
                 width: window.innerWidth,
                 height: window.innerHeight,
-                margin: 0
+                margin: 0,
+                selectedAs: null
             };
         },
 
@@ -237,6 +238,10 @@ define([
                 || nextProps.height !== this.props.height
                 || nextProps.graphData !== this.props.graphData) {
                 this.setState({radialNodes: this._genRadialNodes()});
+            }
+
+            if (nextProps.selectedAs !== this.props.selectedAs) {
+                console.log(this._getBgpNeighborhood(this.props.graphData, this.props.selectedAs));
             }
         },
 
@@ -261,17 +266,23 @@ define([
 
             return this.props.graphData.ases.map(function(node) {
                 var radius = rThis._getRadius(node.customerConeSize, maxConeSize);
+                //console.log(node.lon, Math.cos(-node.lon), Math.sin(-node.lon));
                 return { // Convert to radial coords
                     id: node.asn,
-                    x: maxR * radius * Math.cos(-node.long),
-                    y: maxR * radius * Math.sin(-node.long)
+                    x: maxR * radius * Math.cos(-node.lon*Math.PI/180),
+                    y: maxR * radius * Math.sin(-node.lon*Math.PI/180)
                 };
-            })
+            });
         },
 
         _getRadius: function(coneSize, maxConeSize) {
             // 0<=result<=1
             return (Math.log(maxConeSize)-Math.log(coneSize)) / (Math.log(maxConeSize) - Math.log(1));
+        },
+
+        _getBgpNeighborhood: function(graphData) {
+            // pavervier rock-n-roll
+            return [];
         },
 
         _onZoomOrPan: function(zoom, panX, panY) {
