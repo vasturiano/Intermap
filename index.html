@@ -1,0 +1,32 @@
+<head>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/cytoscape-panzoom/2.2.0/cytoscape.js-panzoom.min.css">
+    <link rel="stylesheet" href="//cdn.rawgit.com/cytoscape/cytoscape.js-navigator/1.0.1/cytoscape.js-navigator.css">
+
+    <link rel="stylesheet" href="main.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.22/require.min.js"></script>
+    <script src="require-config.js"></script>
+
+    <script>
+        require([
+            'jquery',
+            'react',
+            'react-dom',
+            'jsx!intermap'
+        ], function($, React, ReactDOM, IntermapViz) {
+            $.getJSON("data.json", function(data) {
+                $(function() {
+                    ReactDOM.render(
+                        React.createElement(IntermapViz, {
+                            data: data
+                        }),
+                        document.getElementById('viz')
+                    );
+                });
+            });
+        });
+    </script>
+</head>
+
+<body id="viz"></body>

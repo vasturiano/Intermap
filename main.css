@@ -1,0 +1,27 @@
+body {
+    padding: 0;
+    font-family: Sans-Serif;
+    font-size: 80%;
+    background-color: #001;
+}
+
+.d3-tooltip {
+    color: lightgrey;
+    background: rgba(0, 0, 100, .7);
+    padding: 5px;
+    border-radius: 3px;
+    font: 11.5px sans-serif;
+    text-align: center;
+}
+
+.fade-enter, .fade-leave.fade-leave-active {
+    opacity: 0.01;
+}
+
+.fade-leave, .fade-enter.fade-enter-active {
+    opacity: 1;
+}
+
+.fade-enter, .fade-leave {
+    transition: opacity .35s ease-in;
+}
