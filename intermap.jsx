@@ -53,7 +53,7 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
             return <div style={{position: 'relative'}}>
                 <div style={{ position: 'absolute' }}>
                     <AsGraph
-                        graphDataa={this.props.data}
+                        graphData={this.props.data}
                         width={this.state.width}
                         height={this.state.height}
                         margin={this.state.layoutMargin}

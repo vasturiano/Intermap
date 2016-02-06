@@ -46,72 +46,6 @@ define([
         }
     }
 
-    var SigmaGraph = React.createClass({
-
-        componentDidMount: function() {
-            var props = this.props;
-
-            var s = this._sigmaGraph = new sigma({
-                renderers: [
-                    {
-                        container: ReactDOM.findDOMNode(this),
-                        type: 'canvas'
-                    }
-                ]
-            });
-
-            props.nodes.forEach(function(node, idx) {
-                s.graph.addNode({
-                    id: ''+idx,
-                    x: node.x,
-                    y: node.y,
-                    size: Math.random(),
-                    color: 'rgba(190,0,0,0.3)'
-                });
-            });
-
-            props.edges.forEach(function(edge, idx) {
-                s.graph.addEdge({
-                    id: ''+idx,
-                    source: ''+edge.src,
-                    target: ''+edge.dst,
-                    color: 'rgba(0,0,0,0.01)'
-                });
-            });
-
-            s.camera.bind('coordinatesUpdated', function(e) {
-                var camera = e.target;
-                props.onZoomOrPan(
-                    1/camera.ratio,                         // Relative size of viewport
-                    props.width/2-camera.x/camera.ratio,    // Panning offset in px relative to top-left corner
-                    props.height/2-camera.y/camera.ratio
-                );
-            });
-
-            console.log('add nodes/edges');
-            s.refresh();
-            console.log('sigma refresh');
-        },
-
-        render: function() {
-            return <div style={{width: this.props.width, height: this.props.height}}/>;
-        },
-
-        zoom: function(ratio) {
-            this._sigmaGraph.camera.goTo({
-                ratio: 1/ratio
-            });
-        },
-
-        pan: function(x, y) {
-            this._sigmaGraph.camera.goTo({
-                x: this.props.width/2-x,  // consider x,y relative to top-left corner
-                y: this.props.height/2-y
-            });
-        }
-
-    });
-
     var CytoscapeGraph = React.createClass({
 
         const: {
@@ -170,10 +104,10 @@ define([
                     }
                 ],
                 elements: {
-                    nodes: props.nodes.map(function(node, idx) {
+                    nodes: props.nodes.map(function(node) {
                         return {
                             data: {
-                                id: idx
+                                id: node.id
                             },
                             position : {
                                 x: node.x,
@@ -277,7 +211,7 @@ define([
 
         getDefaultProps: function() {
             return {
-                graphData: graphRandomGenerator(500, 1000),
+                graphData: graphRandomGenerator(50, 100),
                 width: window.innerWidth,
                 height: window.innerHeight,
                 margin: 0
@@ -328,16 +262,16 @@ define([
             return this.props.graphData.ases.map(function(node) {
                 var radius = rThis._getRadius(node.customerConeSize, maxConeSize);
                 return { // Convert to radial coords
-                    x: maxR * radius * Math.cos(node.long /*360 * node.x*/),
-                    y: maxR * radius * Math.sin(node.long/*360 * node.x*/)
+                    id: node.asn,
+                    x: maxR * radius * Math.cos(-node.long),
+                    y: maxR * radius * Math.sin(-node.long)
                 };
             })
         },
 
         _getRadius: function(coneSize, maxConeSize) {
-            return coneSize/maxConeSize;
             // 0<=result<=1
-            return Math.log(maxConeSize+1) - Math.log(coneSize+1);
+            return (Math.log(maxConeSize)-Math.log(coneSize)) / (Math.log(maxConeSize) - Math.log(1));
         },
 
         _onZoomOrPan: function(zoom, panX, panY) {
