@@ -283,6 +283,8 @@ define([
                 graph = this.refs.radialGraph,
                 csGraph = graph._csGraph;
 
+            console.log(neighborhood);
+
             var COLORS = {
                 self: 'yellow',
                 customer: 'blue',
