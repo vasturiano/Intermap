@@ -45,7 +45,8 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
             }}>
                 AS: <b>{asInfo.id}</b><br/>
                 (<i>{asInfo.orgName} - {asInfo.country}</i>)<br/>
-                Customer Cone Size: <b>{asInfo.customerConeSize}</b>
+                Customer Cone: <b>{asInfo.customerConeSize}</b> AS
+                {asInfo.customerConeSize>1?'es':''}
             </div>;
         }
     });
