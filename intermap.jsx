@@ -2,16 +2,22 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
 
     var Controls = React.createClass({
         render: function() {
-            return <div>
-                Radius: <b>{this.props.radius}</b><br/>
-                Angle: <b>{this.props.angle}</b><br/>
-                Zoom R: <b>{this.props.zoomRadius}</b><br/>
-                Src node:
+            return <div style={{
+                margin: 10
+                //backgroundColor: 'lightgray',
+                //padding: 5,
+                //borderRadius: 5
+            }}>
+                {/*Radius: <b>{this.props.radius}</b><br/>
+                //Angle: <b>{this.props.angle}</b><br/>
+                Zoom R: <b>{this.props.zoomRadius}</b><br/>*/}
                 <input type="text"
-                    size="6"
+                    size="20"
                     value={this.props.src}
+                    placeholder="Search for AS"
                     onChange={this.props.onSrcChange}
                 />
+                {/*
                 &nbsp;
                 Dst node:
                 <input type="text"
@@ -19,15 +25,27 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                     value={this.props.dst}
                     onChange={this.props.onDstChange}
                 />
+                */}
             </div>;
         }
     });
 
     var Logger = React.createClass({
         render: function() {
-            var props = this.props;
-            return <div>
-                AS: {props.selectedAsInfo.id}
+            var asInfo = this.props.asInfo;
+            if (!asInfo) {
+                return null;
+            }
+
+            return <div style={{
+                backgroundColor: 'lightgray',
+                margin: 5,
+                padding: 5,
+                borderRadius: 5
+            }}>
+                AS: <b>{asInfo.id}</b><br/>
+                (<i>{asInfo.orgName} - {asInfo.country}</i>)<br/>
+                Customer Cone Size: <b>{asInfo.customerConeSize}</b>
             </div>;
         }
     });
@@ -47,7 +65,7 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                 srcHighlight: null,
                 dstHighlight: null,
 
-                selectedAsInfo: {}
+                selectedAsInfo: null
             }
         },
 
@@ -89,10 +107,7 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                 </div>
                 <div style={{
                     right: 0,
-                    position: 'absolute',
-                    backgroundColor: 'lightgray',
-                    padding: 5,
-                    borderRadius: 5
+                    position: 'absolute'
                 }}>
                     <Controls
                         radius={this.state.offsetRadius}
@@ -103,9 +118,13 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                         onSrcChange={this._onSrcChange}
                         onDstChange={this._onDstChange}
                     />
-                    <Logger
-                        selectedAsInfo={this.state.selectedAsInfo}
-                    />
+                </div>
+                <div style={{
+                    right: 0,
+                    top: this.state.height-70,
+                    position: 'absolute'
+                }}>
+                    <Logger asInfo={this.state.selectedAsInfo}/>
                 </div>
             </div>;
         },
