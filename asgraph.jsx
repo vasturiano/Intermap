@@ -93,8 +93,8 @@ define([
                         style: {
                             'curve-style': 'haystack', // 'bezier', //'haystack',
                             width: .05,
-                            opacity: .5,
-                            'line-color': 'white', //'lightgrey', //'blue',
+                            opacity: .3,
+                            'line-color': 'white' //'lightgrey', //'blue',
 
                             //'target-arrow-shape': 'triangle',
                             //'overlay-color': '#c0c0c0',
@@ -300,12 +300,19 @@ define([
             csGraph.style().update();
 
             function colorAs(asn, color) {
+                var node = csGraph.getElementById(asn);
+
+                if (!node) return;
+
+                var curWidth = csGraph.getElementById(asn).style('width').split('px')[0];
+
                 csGraph.style()
                     .selector('#'+asn)
                     .style({
                         'background-color': color,
-                        width: '10px',
-                        height: '10px'
+                        width: (8*curWidth)+'px',
+                        height: (8*curWidth)+'px',
+                        'background-opacity': 1
                     });
             }
 
