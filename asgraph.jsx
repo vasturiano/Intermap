@@ -82,10 +82,10 @@ define([
                             'background-color': 'yellow',
                             'background-opacity': .3, //.2,
 
-                            'content': 'data(name)',
-                            'font-size': '11px',
-                            'font-weight': 'bold',
-                            'color': '#337AB7'
+                            //'content': 'data(name)',
+                            //'font-size': '11px',
+                            //'font-weight': 'bold',
+                            //'color': '#337AB7'
                         }
                     },
                     {
@@ -156,21 +156,7 @@ define([
                 props.onZoomOrPan(cs.zoom(), pan.x, pan.y);
             }
 
-            var adjustElementSizes = _.debounce(function() {
-                var zoom = cs.zoom(),
-                    nodeSize = consts.NODE_SIZE/zoom;
-                cs.style()
-                    .selector('node')
-                        .style({
-                            width: nodeSize,
-                            height: nodeSize
-                        })
-                    .selector('edge')
-                        .style({
-                            width: Math.min(consts.MIN_EDGE_WIDTH*zoom, consts.MAX_EDGE_WIDTH)/zoom
-                        })
-                    .update();
-            }, consts.REFRESH_STYLE_FREQ);
+            var adjustElementSizes = _.debounce(this.resetStyle, consts.REFRESH_STYLE_FREQ);
         },
 
         componentWillReceiveProps: function(nextProps) {
@@ -211,6 +197,31 @@ define([
 
         pan: function(x, y) {
             this._csGraph.pan({x: x, y: y});
+        },
+
+        getNodeById: function(id) {
+            return this._csGraph.getElementById(id);
+        },
+
+        resetStyle: function() {
+            var cs = this._csGraph,
+                zoom = cs.zoom(),
+                nodeSize = this.const.NODE_SIZE/zoom;
+            cs.style()
+                .selector('node')
+                .style({
+                    width: nodeSize,
+                    height: nodeSize,
+                    'border-width': this.const.NODE_SIZE*.1,
+                    'border-color': 'orange',
+                    'background-color': 'yellow',
+                    'background-opacity': .3, //.2,
+                })
+                .selector('edge')
+                .style({
+                    width: Math.min(this.const.MIN_EDGE_WIDTH*zoom, this.const.MAX_EDGE_WIDTH)/zoom
+                })
+                .update();
         }
 
     });
@@ -250,7 +261,7 @@ define([
             }
 
             if (nextProps.selectedAs !== this.props.selectedAs) {
-                console.log(this._getBgpNeighborhood(this.props.selectedAs));
+                this._highlightNeighborhood(nextProps.selectedAs);
             }
         },
 
@@ -265,6 +276,39 @@ define([
                 onNodeHover={this.props.onAsHover}
                 onNodeClick={this.props.onAsClick}
             />;
+        },
+
+        _highlightNeighborhood: function(focusAs) {
+            var neighborHood = this._getBgpNeighborhood(this.props.selectedAs),
+                graph = this.refs.radialGraph,
+                csGraph = graph._csGraph;
+
+            var COLORS = {
+                self: 'yellow',
+                customer: 'blue',
+                provider: 'red',
+                peer: 'green',
+                sibling: 'green'
+            };
+
+            graph.resetStyle();
+
+            colorAs(focusAs, COLORS.self);
+            neighborHood.customers.forEach(function(asn) { colorAs(asn, COLORS.customer); });
+            neighborHood.providers.forEach(function(asn) { colorAs(asn, COLORS.provider); });
+            neighborHood.peers.forEach(function(asn) { colorAs(asn, COLORS.peer); });
+            csGraph.style().update();
+
+            function colorAs(asn, color) {
+                csGraph.style()
+                    .selector('#'+asn)
+                    .style({
+                        'background-color': color,
+                        width: '10px',
+                        height: '10px'
+                    });
+            }
+
         },
 
         _genRadialNodes: function() {
