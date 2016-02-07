@@ -74,6 +74,7 @@ define([
                 autoungrabify: true,
                 hideEdgesOnViewport: true,
                 hideLabelsOnViewport: true,
+                textureOnViewport: true,
                 style: [
                     {
                         selector: 'node',
