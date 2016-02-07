@@ -123,23 +123,6 @@ define(['react', 'react-dom', 'd3', 'triangle-solver'], function(React, ReactDOM
         render: function() {
             var rThis = this;
 
-            function getProjectedAngle(angle) {
-                if (!rThis.props.zoomCenter[0]) return angle; // Right in the center, direct projection
-
-                var knownAngle = angle-rThis.props.zoomCenter[1];
-                while(knownAngle>180) knownAngle-=360;
-                while(knownAngle<-180) knownAngle+=360;
-
-                var neg = knownAngle < 0;
-                knownAngle = Math.abs(knownAngle);
-
-                if (knownAngle == 0 || knownAngle==180) return angle; // Zooming in the exact direction of the angle
-
-                // known angle A, side B (full radius=1), side C (zoom radius)
-                var res = solveTriangle(null, rThis.props.zoomCenter[0], 1, knownAngle, null, null);
-                return rThis.props.zoomCenter[1] + (180 - res[5])*(neg?-1:1); // Use angle C
-            }
-
             var radius = Math.min(this.props.width, this.props.height)/2 - this.props.margin;
 
             return  <svg
@@ -161,8 +144,8 @@ define(['react', 'react-dom', 'd3', 'triangle-solver'], function(React, ReactDOM
                         transform = {
                             'scale(' + (1/rThis.props.zoomRadius) + ')'
                             + ' translate('
-                            + (-radius * rThis.props.zoomCenter[0]*Math.cos(rThis.props.zoomCenter[1]*Math.PI/180)) + ','
-                            + (-radius * rThis.props.zoomCenter[0]*Math.sin(rThis.props.zoomCenter[1]*Math.PI/180)) + ')'
+                            + (-radius * rThis.props.zoomCenter[0]*Math.cos(-rThis.props.zoomCenter[1]*Math.PI/180)) + ','
+                            + (-radius * rThis.props.zoomCenter[0]*Math.sin(-rThis.props.zoomCenter[1]*Math.PI/180)) + ')'
                     }>
                         <GraticuleGrid
                             nConcentricLines={Math.max(2, Math.pow(2, Math.round(Math.log(6/this.props.zoomRadius))))-1}
@@ -186,17 +169,72 @@ define(['react', 'react-dom', 'd3', 'triangle-solver'], function(React, ReactDOM
                     />
 
                     <g>
-                        {Object.keys(this.state.cardinalPoints).map(function(cardPnt) {
+                        {this._getRadialLabels().map(function(label) {
                             return <DirectionMarker
                                 length={rThis.props.margin}
                                 padding={radius}
-                                angle={getProjectedAngle(rThis.state.cardinalPoints[cardPnt])*Math.PI/180}
-                                text={cardPnt}
+                                angle={label.angle}
+                                text={label.text}
                             />
                         })}
                     </g>
                 </g>
             </svg>;
+        },
+
+        _getRadialLabels: function() {
+
+            var rThis = this;
+
+            var cardinalPoints = {
+                S: -90,
+                SE: -45,
+                E: 0,
+                NE: 45,
+                N: 90,
+                NW: 135,
+                W: 180,
+                SW: -135
+            };
+
+            var longCoords = [0, 45, 90, 135, 180, -45, -90, -135];
+
+            function getProjectedAngle(angle) {
+                if (!rThis.props.zoomCenter[0]) return -angle; // Right in the center, direct projection
+
+                var knownAngle = rThis.props.zoomCenter[1] - angle;
+                while(knownAngle>180) knownAngle-=360;
+                while(knownAngle<-180) knownAngle+=360;
+
+                var neg = knownAngle < 0;
+                knownAngle = Math.abs(knownAngle);
+
+                if (knownAngle == 0 || knownAngle==180) return angle; // Zooming in the exact direction of the angle
+
+                // known angle A, side B (full radius=1), side C (zoom radius)
+                var res = solveTriangle(null, rThis.props.zoomCenter[0], 1, knownAngle, null, null);
+                return (180 - res[5])*(neg?-1:1) - rThis.props.zoomCenter[1]; // Use angle C
+            }
+
+            var labels = [];
+
+            labels.push.apply(labels, Object.keys(cardinalPoints).map(function(cardPnt) {
+                    return {
+                        text: cardPnt,
+                        angle: getProjectedAngle(cardinalPoints[cardPnt])*Math.PI/180
+                    };
+                })
+            );
+            /*
+            labels.push.apply(labels, longCoords.map(function(longCoord) {
+                    return {
+                        text: longCoord + "°",
+                        angle: getProjectedAngle(longCoord)*Math.PI/180
+                    };
+                })
+            );*/
+
+            return labels;
         }
     });
 

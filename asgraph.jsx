@@ -299,7 +299,7 @@ define([
                 offsetX = -(panX-this.props.width/2)/zoom/r,
                 offsetY = -(panY-this.props.height/2)/zoom/r,
                 offsetR = Math.sqrt(Math.pow(offsetX, 2) + Math.pow(offsetY, 2)),
-                offsetAng = offsetR?Math.acos(offsetX/offsetR)/Math.PI*180:0,
+                offsetAng = offsetR?-Math.acos(offsetX/offsetR)/Math.PI*180:0,
                 zoomRadius = 1/zoom;
 
             if (offsetY<0) { // Complementary angle
