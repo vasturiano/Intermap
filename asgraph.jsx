@@ -224,7 +224,8 @@ define([
                 maxCustomerConeSize: Math.max.apply(null, this.props.graphData.ases.map(function(asNode) {
                     return asNode.customerConeSize
                 })),
-                radialNodes: this._genRadialNodes()
+                radialNodes: this._genRadialNodes(),
+                asnNeighborhood: this._genNeighborhoodStructure()
             }
         },
 
@@ -241,7 +242,7 @@ define([
             }
 
             if (nextProps.selectedAs !== this.props.selectedAs) {
-                console.log(this._getBgpNeighborhood(this.props.graphData, this.props.selectedAs));
+                console.log(this._getBgpNeighborhood(this.props.selectedAs));
             }
         },
 
@@ -280,7 +281,16 @@ define([
             return (Math.log(maxConeSize)-Math.log(coneSize)) / (Math.log(maxConeSize) - Math.log(1));
         },
 
-        _getBgpNeighborhood: function(graphData) {
+        _genNeighborhoodStructure: function() {
+            var graph = this.props.graphData;
+
+            return [];
+        },
+
+        _getBgpNeighborhood: function(asn) {
+            var graph = this.props.graphData,
+                neighborHoodStructure = this.state.asnNeighborhood;
+
             // pavervier rock-n-roll
             return [];
         },
