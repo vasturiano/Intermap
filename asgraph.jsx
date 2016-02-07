@@ -317,8 +317,6 @@ define([
             var providers = [];
             var peers     = [];
             
-            ccone.push(asn);
-            
             //console.log(asn);
             
             //console.log(neighborHoodStructure[asn]);
