@@ -317,7 +317,7 @@ define([
             var providers = [];
             var peers     = [];
             
-            //ccone.push(asn);
+            ccone.push(asn);
             
             //console.log(asn);
             
