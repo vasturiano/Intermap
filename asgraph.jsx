@@ -72,9 +72,11 @@ define([
                 minZoom: 1,
                 maxZoom: 100,
                 autoungrabify: true,
+                autolock: true,
                 hideEdgesOnViewport: true,
                 hideLabelsOnViewport: true,
                 textureOnViewport: true,
+                motionBlur: true,
                 style: [
                     {
                         selector: 'node',
@@ -101,9 +103,9 @@ define([
                             'line-color': 'white', //'lightgrey', //'blue',
 
                             //'target-arrow-shape': 'triangle',
-                            'overlay-color': '#c0c0c0',
-                            'overlay-padding': '2px',
-                            'overlay-opacity': 40
+                            //'overlay-color': '#c0c0c0',
+                            //'overlay-padding': '2px',
+                            //'overlay-opacity': 40
 
                         }
                     }
@@ -220,7 +222,7 @@ define([
 
         getDefaultProps: function() {
             return {
-                graphData: graphRandomGenerator(50, 100),
+                graphData: graphRandomGenerator(5, 10),
                 width: window.innerWidth,
                 height: window.innerHeight,
                 margin: 0,
