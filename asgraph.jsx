@@ -267,7 +267,6 @@ define([
 
             return this.props.graphData.ases.map(function(node) {
                 var radius = rThis._getRadius(node.customerConeSize, maxConeSize);
-                //console.log(node.lon, Math.cos(-node.lon), Math.sin(-node.lon));
                 return { // Convert to radial coords
                     id: node.asn,
                     x: maxR * radius * Math.cos(-node.lon*Math.PI/180),
@@ -278,7 +277,7 @@ define([
 
         _getRadius: function(coneSize, maxConeSize) {
             // 0<=result<=1
-            return (Math.log(maxConeSize)-Math.log(coneSize)) / (Math.log(maxConeSize) - Math.log(1));
+            return (Math.log(maxConeSize)-Math.log(coneSize)) / (Math.log(maxConeSize) - Math.log(1))*0.99 + 0.01;
         },
 
         _genNeighborhoodStructure: function() {
