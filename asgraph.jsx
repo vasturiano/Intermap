@@ -37,7 +37,7 @@ define([
             });
         }
 
-        console.log('finished random gen');
+        //console.log('finished random gen');
         return {
             ases: nodes,
             relationships: edges
@@ -45,6 +45,12 @@ define([
     }
 
     var CytoscapeGraph = React.createClass({
+
+        getDefaultProps: function() {
+            return {
+                onNodeHover: function (nodeData) {}
+            }
+        },
 
         const: {
             REFRESH_STYLE_FREQ: 400, // ms
@@ -103,10 +109,9 @@ define([
                 ],
                 elements: {
                     nodes: props.nodes.map(function(node) {
+                        var nodeData = $.extend({id: node.id}, node.nodeData);
                         return {
-                            data: {
-                                id: node.id
-                            },
+                            data: $.extend({id: node.id}, node.nodeData),
                             position : {
                                 x: node.x,
                                 y: node.y
@@ -127,7 +132,10 @@ define([
                     adjustElementSizes();
                     zoomOrPan();
                 })
-                .on('pan', zoomOrPan);
+                .on('pan', zoomOrPan)
+                .on('mouseover', 'node', function(event, a, b) {
+                    props.onNodeHover(this.data());
+                });
 
             console.log('cytoscape add nodes/edges');
 
@@ -254,6 +262,7 @@ define([
                 width={this.props.width}
                 height={this.props.height}
                 onZoomOrPan={this._onZoomOrPan}
+                onNodeHover={this.props.onAsHover}
             />;
         },
 
@@ -270,7 +279,8 @@ define([
                 return { // Convert to radial coords
                     id: node.asn,
                     x: maxR * radius * Math.cos(-node.lon*Math.PI/180),
-                    y: maxR * radius * Math.sin(-node.lon*Math.PI/180)
+                    y: maxR * radius * Math.sin(-node.lon*Math.PI/180),
+                    nodeData: node
                 };
             });
         },

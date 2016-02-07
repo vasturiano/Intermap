@@ -23,6 +23,15 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
         }
     });
 
+    var Logger = React.createClass({
+        render: function() {
+            var props = this.props;
+            return <div>
+                AS: {props.selectedAsInfo.id}
+            </div>;
+        }
+    });
+
     return React.createClass({
 
         getInitialState: function() {
@@ -36,7 +45,9 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                 zoomRadius: 1,
 
                 srcHighlight: null,
-                dstHighlight: null
+                dstHighlight: null,
+
+                selectedAsInfo: {}
             }
         },
 
@@ -59,6 +70,7 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                         margin={this.state.layoutMargin}
                         selectedAs={this.state.srcHighlight}
                         onRadialViewportChange={this._onRadialViewportChange}
+                        onAsHover={this._onAsHover}
                     />
                 </div>
 
@@ -91,6 +103,9 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                         onSrcChange={this._onSrcChange}
                         onDstChange={this._onDstChange}
                     />
+                    <Logger
+                        selectedAsInfo={this.state.selectedAsInfo}
+                    />
                 </div>
             </div>;
         },
@@ -100,6 +115,10 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                 width: window.innerWidth,
                 height: window.innerHeight - 20
             });
+        },
+
+        _onAsHover: function(asInfo) {
+            this.setState({selectedAsInfo: asInfo});
         },
 
         _onSrcChange: function(event) {
