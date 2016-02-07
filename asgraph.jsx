@@ -327,7 +327,7 @@ define([
             var providers = [];
             var peers     = [];
             
-            //ccone.push(asn);
+            var neighbors = [];
             
             //console.log(asn);
             
@@ -337,13 +337,14 @@ define([
             for (neighbor in neighborHoodStructure[asn]) {
                 if (neighborHoodStructure[asn][neighbor] == "1") {
                     customers.push(neighbor);
-                    ccone.push(neighbor);
+                    //ccone.push(neighbor);
                 } else if (neighborHoodStructure[asn][neighbor] == "-1") {
                     providers.push(neighbor);
-                    pcone.push(neighbor);
+                    //pcone.push(neighbor);
                 } else if (neighborHoodStructure[asn][neighbor] == "0") {
                     peers.push(neighbor);
                 }
+                neighbors.push(neighbor);
             }
             
             //console.log(ccone);
@@ -381,7 +382,7 @@ define([
             //console.log(peers);
 
             
-            return {"customers" : ccone, "providers" : pcone, "peers": peers};
+            return {"customers" : ccone, "providers" : pcone, "peers" : peers, "neighbors" : neighbors};
         },
 
         _onZoomOrPan: function(zoom, panX, panY) {
