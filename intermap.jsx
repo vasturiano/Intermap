@@ -44,9 +44,25 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                 borderRadius: 5
             }}>
                 AS: <b>{asInfo.id}</b><br/>
-                (<i>{asInfo.orgName} - {asInfo.country}</i>)<br/>
+                <div style={{ 'text-overflow':'ellipsis','width':'300'}}>
+                    (<i>{asInfo.orgName} - {asInfo.country}</i>)</div>
                 Customer Cone: <b>{asInfo.customerConeSize}</b> AS
-                {asInfo.customerConeSize>1?'es':''}
+                {asInfo.customerConeSize>1?'es':''}<br/>
+                Rank: <b>{asInfo.rank}</b><br/>
+                    <table border="1" style={{
+                        'font-size':'50%', 'text-align':'center'
+                        }}><tr>
+                        <td rowSpan="2" style={{
+                            'font-size':'200%', 'v-align':'center'
+                            }}> Degree: </td>
+                         <td><b> {asInfo.degreeProvider}</b></td>
+                         <td><b> {asInfo.degreePeer}</b></td>
+                         <td><b> {asInfo.degreeCustomer}</b></td>
+                    </tr><tr>
+                         <td>provider</td>
+                         <td>peer</td>
+                         <td>customer</td>
+                    </tr></table>
             </div>;
         }
     });
@@ -121,8 +137,8 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                     />
                 </div>
                 <div style={{
-                    right: 0,
-                    top: this.state.height-70,
+                    left: 0,
+                    top: this.state.height-100,
                     position: 'absolute'
                 }}>
                     <Logger asInfo={this.state.selectedAsInfo}/>
