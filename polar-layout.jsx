@@ -157,7 +157,7 @@ define(['react', 'react-dom', 'd3', 'triangle-solver', 'locations'], function(Re
                         r={radius + 500}
                         stroke={this.props.bckgColor}
                         strokeWidth='1000'
-                        strokeOpacity='0.8'
+                        strokeOpacity='0.7'
                         fillOpacity='0'
                     />
                     <circle
