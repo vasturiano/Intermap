@@ -46,12 +46,6 @@ define([
 
     var CytoscapeGraph = React.createClass({
 
-        getDefaultProps: function() {
-            return {
-                onNodeHover: function (nodeData) {}
-            }
-        },
-
         const: {
             REFRESH_STYLE_FREQ: 400, // ms
             MIN_EDGE_WIDTH: 0.05,
@@ -136,11 +130,14 @@ define([
                     zoomOrPan();
                 })
                 .on('pan', zoomOrPan)
-                .on('mouseover', 'node', function(event, a, b) {
+                .on('mouseover', 'node', function() {
                     props.onNodeHover(this.data());
+                })
+                .on('select', 'node', function() {
+                    props.onNodeClick(this.data());
                 });
 
-            console.log('cytoscape add nodes/edges');
+            // console.log('cytoscape add nodes/edges');
 
             cs.panzoom({
                 zoomFactor: 0.1, // zoom factor per zoom tick
@@ -266,6 +263,7 @@ define([
                 height={this.props.height}
                 onZoomOrPan={this._onZoomOrPan}
                 onNodeHover={this.props.onAsHover}
+                onNodeClick={this.props.onAsClick}
             />;
         },
 
@@ -297,7 +295,7 @@ define([
             var graph = this.props.graphData;
             var to_return = {};
             
-            console.log(Object.keys(graph).length);
+            //console.log(Object.keys(graph).length);
             
             for (var i = 0; i < graph["relationships"].length; i++) {
                 var rel = graph["relationships"][i];

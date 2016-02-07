@@ -90,6 +90,7 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                         selectedAs={this.state.srcHighlight}
                         onRadialViewportChange={this._onRadialViewportChange}
                         onAsHover={this._onAsHover}
+                        onAsClick={this._onAsClick}
                     />
                 </div>
 
@@ -139,6 +140,10 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
 
         _onAsHover: function(asInfo) {
             this.setState({selectedAsInfo: asInfo});
+        },
+
+        _onAsClick: function(asInfo) {
+            this.setState({srcHighlight: asInfo.id});
         },
 
         _onSrcChange: function(event) {
