@@ -282,16 +282,96 @@ define([
 
         _genNeighborhoodStructure: function() {
             var graph = this.props.graphData;
-
-            return [];
+            var to_return = {};
+            
+            console.log(Object.keys(graph).length);
+            
+            for (var i = 0; i < graph["relationships"].length; i++) {
+                var rel = graph["relationships"][i];
+                if (!(rel["src"] in to_return)) {
+                    to_return[rel["src"]]={};
+                }
+                if (!(rel["dst"] in to_return)) {
+                    to_return[rel["dst"]]={};
+                }
+                if (rel["type"] == "customer") {
+                    to_return[rel["src"]][rel["dst"]] = -1;
+                } else if (rel["type"] == "provider") {
+                    to_return[rel["src"]][rel["dst"]] = 1;
+                } else if (rel["type"] == "peer") {
+                    to_return[rel["src"]][rel["dst"]] = 0;
+                }
+            }
+                        
+            return to_return;
         },
 
         _getBgpNeighborhood: function(asn) {
             var graph = this.props.graphData,
                 neighborHoodStructure = this.state.asnNeighborhood;
 
-            // pavervier rock-n-roll
-            return [];
+            var ccone     = [];
+            var pcone     = [];
+
+            var customers = [];
+            var providers = [];
+            var peers     = [];
+            
+            //ccone.push(asn);
+            
+            //console.log(asn);
+            
+            //console.log(neighborHoodStructure[asn]);
+            
+            var neighbor;
+            for (neighbor in neighborHoodStructure[asn]) {
+                if (neighborHoodStructure[asn][neighbor] == "1") {
+                    customers.push(neighbor);
+                    ccone.push(neighbor);
+                } else if (neighborHoodStructure[asn][neighbor] == "-1") {
+                    providers.push(neighbor);
+                    pcone.push(neighbor);
+                } else if (neighborHoodStructure[asn][neighbor] == "0") {
+                    peers.push(neighbor);
+                }
+            }
+            
+            //console.log(ccone);
+            //console.log(pcone);
+            //console.log(peers);
+            
+            var c;
+            while (customers.length > 0) {
+                c = customers.pop();
+                //console.log("customer"+c);
+                for (neighbor in neighborHoodStructure[c]) {
+                    if (neighborHoodStructure[asn][neighbor] == "1") {
+                        customers.push(neighbor);
+                    }
+                }
+                ccone.push(c);
+            }
+            
+            var p;
+            while (providers.length > 0) {
+                p = providers.pop();
+                //console.log("provider"+p);
+                for (neighbor in neighborHoodStructure[p]) {
+                    if (neighborHoodStructure[asn][neighbor] == "-1") {
+                        providers.push(neighbor);
+                    }
+                }
+                pcone.push(p);
+            }
+            
+            //console.log("done")
+            
+            //console.log(ccone);
+            //console.log(pcone);
+            //console.log(peers);
+
+            
+            return {"customers" : ccone, "providers" : pcone, "peers": peers};
         },
 
         _onZoomOrPan: function(zoom, panX, panY) {
