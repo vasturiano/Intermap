@@ -1,5 +1,82 @@
 define(['react', 'react-dom', 'd3', 'triangle-solver'], function(React, ReactDOM, d3, solveTriangle) {
 
+    var DirectionMarker = React.createClass({
+        propTypes: {
+            length: React.PropTypes.number.isRequired,
+            padding: React.PropTypes.number,
+            angle: React.PropTypes.number.isRequired,
+            text: React.PropTypes.string
+        },
+
+        getDefaultProps: function() {
+            return {
+                padding: 0,
+                text: ''
+            }
+        },
+
+        render: function() {
+
+            var txtX = (this.props.padding+this.props.length/2)*Math.cos(this.props.angle),
+                txtY = (this.props.padding+this.props.length/2)*Math.sin(this.props.angle),
+                txtRotate = this.props.angle*180/Math.PI;
+
+            while (txtRotate>=180) { txtRotate -= 360; }
+            while (txtRotate<-180) { txtRotate += 360; }
+            txtRotate += ((txtRotate>0)?-90:90);
+
+            return <g>
+                <linee
+                    x1={this.props.padding*Math.cos(this.props.angle)}
+                    y1={this.props.padding*Math.sin(this.props.angle)}
+                    x2={(this.props.padding+this.props.length)*Math.cos(this.props.angle)}
+                    y2={(this.props.padding+this.props.length)*Math.sin(this.props.angle)}
+                    stroke='grey'
+                    />
+                <text
+                    x={txtX}
+                    y={txtY}
+                    fontSize={this.props.length*.6}
+                    fontFamily="Sans-serif"
+                    fill='lightgrey'
+                    textAnchor="middle"
+                    transform={'rotate(' + txtRotate + ' ' + txtX + ',' + txtY + ')'}
+                    style = {{ 'alignmentBaseline': "central" }}
+                    >{this.props.text}</text>
+            </g>;
+        }
+    });
+
+    var GraticuleGrid = React.createClass({
+
+        render: function() {
+            var props = this.props;
+            return <g>
+                {Array.apply(null, {length: props.nRadialLines}).map(function(_, idx) {
+                    var angle = idx*360/props.nRadialLines*Math.PI/180;
+                    return <line
+                        x1={0}
+                        y1={0}
+                        x2={props.radius*Math.cos(angle)}
+                        y2={props.radius*Math.sin(angle)}
+                        stroke = 'lightgrey'
+                        strokeWidth = '1'
+                        style = {{fillOpacity: 0, vectorEffect: 'non-scaling-stroke'}}
+                        />
+                })}
+                {Array.apply(null, {length: props.nConcentricLines}).map(function(_, idx) {
+                    return <circle
+                        r = {props.radius*(idx+1)/(props.nConcentricLines+1)}
+                        stroke = 'lightgrey'
+                        strokeWidth = '1'
+                        style = {{fillOpacity: 0, vectorEffect: 'non-scaling-stroke'}}
+                    />
+                })}
+            </g>;
+        }
+
+    });
+
     return React.createClass({
 
         propTypes: {
@@ -76,7 +153,30 @@ define(['react', 'react-dom', 'd3', 'triangle-solver'], function(React, ReactDOM
                         + (this.props.height/2) + ')'
                     }
                     >
-                    {/*
+                    <circlee
+                        r={radius}
+                        fill='#FAFAFA'
+                        />
+                    <g
+                        transform = {
+                            'scale(' + (1/rThis.props.zoomRadius) + ')'
+                            + ' translate('
+                            + (-radius * rThis.props.zoomCenter[0]*Math.cos(rThis.props.zoomCenter[1]*Math.PI/180)) + ','
+                            + (-radius * rThis.props.zoomCenter[0]*Math.sin(rThis.props.zoomCenter[1]*Math.PI/180)) + ')'
+                    }>
+                        <GraticuleGrid
+                            nConcentricLines={Math.max(2, Math.pow(2, Math.round(Math.log(6/this.props.zoomRadius))))-1}
+                            nRadialLines={Math.max(4, Math.pow(2, Math.round(Math.log(6/this.props.zoomRadius))))}
+                            radius={radius}
+                            />
+                    </g>
+                    <circle
+                        r={radius + 500}
+                        stroke={this.props.bckgColor}
+                        strokeWidth='1000'
+                        strokeOpacity='0.7'
+                        fillOpacity='0'
+                    />
                     <circle
                         r={radius + this.props.margin/2}
                         stroke='#3182bd'
@@ -84,7 +184,17 @@ define(['react', 'react-dom', 'd3', 'triangle-solver'], function(React, ReactDOM
                         strokeOpacity='0.6'
                         fillOpacity='0'
                     />
-                    */}
+
+                    <g>
+                        {Object.keys(this.state.cardinalPoints).map(function(cardPnt) {
+                            return <DirectionMarker
+                                length={rThis.props.margin}
+                                padding={radius}
+                                angle={getProjectedAngle(rThis.state.cardinalPoints[cardPnt])*Math.PI/180}
+                                text={cardPnt}
+                            />
+                        })}
+                    </g>
                 </g>
             </svg>;
         }
