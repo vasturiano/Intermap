@@ -1,4 +1,4 @@
-define(['react', 'react-dom', 'd3', 'triangle-solver'], function(React, ReactDOM, d3, solveTriangle) {
+define(['react', 'react-dom', 'd3', 'triangle-solver', 'locations'], function(React, ReactDOM, d3, solveTriangle, locations) {
 
     var DirectionMarker = React.createClass({
         propTypes: {
@@ -157,7 +157,7 @@ define(['react', 'react-dom', 'd3', 'triangle-solver'], function(React, ReactDOM
                         r={radius + 500}
                         stroke={this.props.bckgColor}
                         strokeWidth='1000'
-                        strokeOpacity='0.7'
+                        strokeOpacity='0.8'
                         fillOpacity='0'
                     />
                     <circle
@@ -186,17 +186,6 @@ define(['react', 'react-dom', 'd3', 'triangle-solver'], function(React, ReactDOM
 
             var rThis = this;
 
-            var cardinalPoints = {
-                S: -90,
-                SE: -45,
-                E: 0,
-                NE: 45,
-                N: 90,
-                NW: 135,
-                W: 180,
-                SW: -135
-            };
-
             var longCoords = [0, 45, 90, 135, 180, -45, -90, -135];
 
             function getProjectedAngle(angle) {
@@ -216,23 +205,51 @@ define(['react', 'react-dom', 'd3', 'triangle-solver'], function(React, ReactDOM
                 return (180 - res[5])*(neg?-1:1) - rThis.props.zoomCenter[1]; // Use angle C
             }
 
+            function filterLabels(labels, charRatio) {
+
+            }
+
             var labels = [];
 
-            labels.push.apply(labels, Object.keys(cardinalPoints).map(function(cardPnt) {
+            /*
+            var cardinalPoints = {
+                S: -90,
+                SE: -45,
+                E: 0,
+                NE: 45,
+                N: 90,
+                NW: 135,
+                W: 180,
+                SW: -135
+            };
+            labels.push.apply(labels, Object.keys(cardinalPoints).map(
+                function(cardPnt) {
                     return {
                         text: cardPnt,
                         angle: getProjectedAngle(cardinalPoints[cardPnt])*Math.PI/180
                     };
                 })
             );
-            /*
+            */
+
+            labels.push.apply(labels, locations.map(
+                function(loc) {
+                    return {
+                        text: loc.text,
+                        angle: getProjectedAngle(loc.angle)*Math.PI/180
+                    };
+                })
+            );
+
+
             labels.push.apply(labels, longCoords.map(function(longCoord) {
                     return {
                         text: longCoord + "°",
                         angle: getProjectedAngle(longCoord)*Math.PI/180
                     };
                 })
-            );*/
+            );
+
 
             return labels;
         }
