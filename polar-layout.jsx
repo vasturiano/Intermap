@@ -232,6 +232,7 @@ define(['react', 'react-dom', 'd3', 'triangle-solver', 'locations'], function(Re
             );
             */
 
+            /*
             labels.push.apply(labels, locations.map(
                 function(loc) {
                     return {
@@ -239,7 +240,7 @@ define(['react', 'react-dom', 'd3', 'triangle-solver', 'locations'], function(Re
                         angle: getProjectedAngle(loc.angle)*Math.PI/180
                     };
                 })
-            );
+            );*/
 
 
             labels.push.apply(labels, longCoords.map(function(longCoord) {
