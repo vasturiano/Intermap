@@ -2,6 +2,7 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout', 'underscore'], 
 
     var Controls = React.createClass({
         render: function() {
+            return null;
             return <div style={{
                 margin: 10
                 //backgroundColor: 'lightgray',

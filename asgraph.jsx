@@ -268,7 +268,7 @@ define([
             }
 
             if (nextProps.selectedAs !== this.props.selectedAs) {
-                this._highlightNeighborhood(nextProps.selectedAs);
+                //this._highlightNeighborhood(nextProps.selectedAs);
             }
         },
 
