@@ -48,7 +48,7 @@ define([
 
         const: {
             REFRESH_STYLE_FREQ: 400, // ms
-            MIN_EDGE_WIDTH: 0.05,
+            MIN_EDGE_WIDTH: 0.15,
             MAX_EDGE_WIDTH: 0.25,
             NODE_SIZE: 2
         },
@@ -100,8 +100,10 @@ define([
                         style: {
                             'curve-style': 'haystack', // 'bezier', //'haystack',
                             width: .05,
-                            opacity: .3,
-                            'line-color': function (ele) { return ele.data('color') }
+                            'opacity': function (ele) { 
+                                return ele.data('opacity')},
+                            'line-color': function (ele) { 
+                                return ele.data('color') }
                             //'target-arrow-shape': 'triangle',
                             //'overlay-color': '#c0c0c0',
                             //'overlay-padding': '2px',
@@ -126,7 +128,8 @@ define([
                             data: {
                                 source: edge.src,
                                 target: edge.dst,
-                                color: valueRgb(edge.customerConeSize, size_max)
+                                color: valueRgb(edge.customerConeSize, size_max),
+                                opacity: valueOpacity(edge.customerConeSize, size_max)
                             }
                         };
                     })
@@ -464,6 +467,12 @@ define([
     });
 
 });
+        function valueOpacity(value, value_max) {
+            if (value == null) {
+                value = 1;
+            } 
+            return (Math.log(value)/Math.log(value_max))*.6 + .3;
+        }
 
         function valueRgb(value, value_max) {
             if (value == null) {
