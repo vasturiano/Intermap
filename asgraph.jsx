@@ -283,7 +283,7 @@ define([
                 graph = this.refs.radialGraph,
                 csGraph = graph._csGraph;
 
-            console.log(neighborhood);
+            console.log(neighborHood);
 
             var COLORS = {
                 self: 'yellow',
@@ -304,9 +304,9 @@ define([
             function colorAs(asn, color) {
                 var node = csGraph.getElementById(asn);
 
-                if (!node) return;
+                if (!node.length) return;
 
-                var curWidth = csGraph.getElementById(asn).style('width').split('px')[0];
+                var curWidth = node.style('width').split('px')[0];
 
                 csGraph.style()
                     .selector('#'+asn)
