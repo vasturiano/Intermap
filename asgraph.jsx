@@ -56,6 +56,13 @@ define([
         componentDidMount: function() {
             var props = this.props,
                 consts = this.const;
+            var size_max = 1;
+            for (var i = 0; i < props.edges.length; i++) {
+                var size = props.edges[i]["customerConeSize"];
+                if (size != null) {
+                    size_max = size;
+                }
+            }
 
             var cs = this._csGraph = cytoscape({
                 container: ReactDOM.findDOMNode(this),
@@ -94,8 +101,7 @@ define([
                             'curve-style': 'haystack', // 'bezier', //'haystack',
                             width: .05,
                             opacity: .3,
-                            'line-color': 'white' //'lightgrey', //'blue',
-
+                            'line-color': function (ele) { return ele.data('color') }
                             //'target-arrow-shape': 'triangle',
                             //'overlay-color': '#c0c0c0',
                             //'overlay-padding': '2px',
@@ -119,7 +125,8 @@ define([
                         return {
                             data: {
                                 source: edge.src,
-                                target: edge.dst
+                                target: edge.dst,
+                                color: valueRgb(edge.customerConeSize, size_max)
                             }
                         };
                     })
@@ -347,9 +354,9 @@ define([
         _genNeighborhoodStructure: function() {
             var graph = this.props.graphData;
             var to_return = {};
-            
+
             //console.log(Object.keys(graph).length);
-            
+
             for (var i = 0; i < graph["relationships"].length; i++) {
                 var rel = graph["relationships"][i];
                 if (!(rel["src"] in to_return)) {
@@ -366,7 +373,7 @@ define([
                     to_return[rel["src"]][rel["dst"]] = 0;
                 }
             }
-                        
+
             return to_return;
         },
 
@@ -380,13 +387,13 @@ define([
             var customers = [];
             var providers = [];
             var peers     = [];
-            
+
             var neighbors = [];
-            
+
             //console.log(asn);
-            
+
             //console.log(neighborHoodStructure[asn]);
-            
+
             var neighbor;
             for (neighbor in neighborHoodStructure[asn]) {
                 if (neighborHoodStructure[asn][neighbor] == "1") {
@@ -400,11 +407,11 @@ define([
                 }
                 neighbors.push(neighbor);
             }
-            
+
             //console.log(ccone);
             //console.log(pcone);
             //console.log(peers);
-            
+
             var c;
             while (customers.length > 0) {
                 c = customers.pop();
@@ -416,7 +423,7 @@ define([
                 }
                 ccone.push(c);
             }
-            
+
             var p;
             while (providers.length > 0) {
                 p = providers.pop();
@@ -428,14 +435,14 @@ define([
                 }
                 pcone.push(p);
             }
-            
+
             //console.log("done")
-            
+
             //console.log(ccone);
             //console.log(pcone);
             //console.log(peers);
 
-            
+
             return {"customers" : ccone, "providers" : pcone, "peers" : peers, "neighbors" : neighbors};
         },
 
@@ -457,3 +464,54 @@ define([
     });
 
 });
+
+        function valueRgb(value, value_max) {
+            if (value == null) {
+                value = 1;
+            } else if (value <= 0.000001) {
+                value = 0.000001;
+            }
+            var temp = Math.log(value)/Math.log(value_max);
+            //var hue = (360*(4+5+temp/8))%360;
+            var hue = temp*.7 + .5;//value;
+            var sat = 1;
+            var bri = 1;
+        //    return "hsl("+hue+",100%,100%)";
+            //    bri = .80*temp+.20;
+            //var color = "hsl("+hue+","+(100*sat)+"%,"+(100*bri)+"%)";
+            var rgb = hsvRgb(hue, sat, bri);
+            for(var i=0;i<3;i++) {
+                rgb[i] = rgb[i].toString(16);
+                while (rgb[i].length < 2) {
+                    rgb[i] = "0"+rgb[i];
+                }
+            }
+            var color = "#"+rgb[0]+rgb[1]+rgb[2];
+            return color;
+        }
+
+        function hsvRgb(hue, sat, bri) {
+           var h = hue, s = sat, v = bri;
+           var r, g, b, i, f, p, q, t;
+            if (arguments.length === 1) {
+                s = h.s, v = h.v, h = h.h;
+            }
+            i = Math.floor(h * 6);
+            f = h * 6 - i;
+            p = v * (1 - s);
+            q = v * (1 - f * s);
+            t = v * (1 - (1 - f) * s);
+            switch (i % 6) {
+                case 0: r = v, g = t, b = p; break;
+                case 1: r = q, g = v, b = p; break;
+                case 2: r = p, g = v, b = t; break;
+                case 3: r = p, g = q, b = v; break;
+                case 4: r = t, g = p, b = v; break;
+                case 5: r = v, g = p, b = q; break;
+            }
+            var rgb = [Math.round(r * 255),
+                Math.round(g * 255),
+                Math.round(b * 255)
+                ];
+            return rgb;
+        }

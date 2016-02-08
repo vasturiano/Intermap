@@ -15,7 +15,7 @@
             'react-dom',
             'jsx!intermap'
         ], function($, React, ReactDOM, IntermapViz) {
-            $.getJSON("data/us-graph.json", function(data) {
+            $.getJSON("data/graph.json", function(data) {
                 $(function() {
                     ReactDOM.render(
                         React.createElement(IntermapViz, {
