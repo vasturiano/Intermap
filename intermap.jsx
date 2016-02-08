@@ -66,9 +66,9 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout', 'underscore'], 
                          <td><b> {asInfo.degreePeer}</b></td>
                          <td><b> {asInfo.degreeCustomer}</b></td>
                     </tr><tr>
-                         <td style={{color: 'red'}}>provider</td>
-                         <td style={{color: 'green'}}>peer</td>
-                         <td style={{color: 'blue'}}>customer</td>
+                         <td>provider</td>
+                         <td>peer</td>
+                         <td>customer</td>
                     </tr></table>
             </div>;
         }
