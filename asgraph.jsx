@@ -271,7 +271,7 @@ define([
             }
 
             if (nextProps.selectedAs !== this.props.selectedAs) {
-                this._highlightNeighborhood(nextProps.selectedAs);
+                //this._highlightNeighborhood(nextProps.selectedAs);
             }
         },
 
@@ -293,7 +293,7 @@ define([
                 graph = this.refs.radialGraph,
                 csGraph = graph._csGraph;
 
-            console.log(neighborhood);
+            console.log(neighborHood);
 
             var COLORS = {
                 self: 'yellow',
@@ -314,9 +314,9 @@ define([
             function colorAs(asn, color) {
                 var node = csGraph.getElementById(asn);
 
-                if (!node) return;
+                if (!node.length) return;
 
-                var curWidth = csGraph.getElementById(asn).style('width').split('px')[0];
+                var curWidth = node.style('width').split('px')[0];
 
                 csGraph.style()
                     .selector('#'+asn)
@@ -357,9 +357,9 @@ define([
         _genNeighborhoodStructure: function() {
             var graph = this.props.graphData;
             var to_return = {};
-
+            
             //console.log(Object.keys(graph).length);
-
+            
             for (var i = 0; i < graph["relationships"].length; i++) {
                 var rel = graph["relationships"][i];
                 if (!(rel["src"] in to_return)) {
@@ -370,13 +370,16 @@ define([
                 }
                 if (rel["type"] == "customer") {
                     to_return[rel["src"]][rel["dst"]] = -1;
+                    to_return[rel["dst"]][rel["src"]] = 1;
                 } else if (rel["type"] == "provider") {
                     to_return[rel["src"]][rel["dst"]] = 1;
+                    to_return[rel["dst"]][rel["src"]] = -1;
                 } else if (rel["type"] == "peer") {
                     to_return[rel["src"]][rel["dst"]] = 0;
+                    to_return[rel["dst"]][rel["src"]] = 0;
                 }
             }
-
+                        
             return to_return;
         },
 
@@ -390,62 +393,81 @@ define([
             var customers = [];
             var providers = [];
             var peers     = [];
-
+            
             var neighbors = [];
-
-            //console.log(asn);
-
-            //console.log(neighborHoodStructure[asn]);
-
+            
+            console.log(asn);
+            
+            console.log(neighborHoodStructure[asn]);
+            
             var neighbor;
             for (neighbor in neighborHoodStructure[asn]) {
-                if (neighborHoodStructure[asn][neighbor] == "1") {
-                    customers.push(neighbor);
-                    //ccone.push(neighbor);
-                } else if (neighborHoodStructure[asn][neighbor] == "-1") {
-                    providers.push(neighbor);
-                    //pcone.push(neighbor);
-                } else if (neighborHoodStructure[asn][neighbor] == "0") {
-                    peers.push(neighbor);
+                if (typeof neighbor !== "undefined") {
+                    if (neighborHoodStructure[asn][neighbor] == "1") {
+                        customers.push(neighbor);
+                        ccone.push(neighbor);
+                        console.log("customer"+neighbor);
+                    } else if (neighborHoodStructure[asn][neighbor] == "-1") {
+                        providers.push(neighbor);
+                        pcone.push(neighbor);
+                        console.log("provider"+neighbor);
+                    } else if (neighborHoodStructure[asn][neighbor] == "0") {
+                        peers.push(neighbor);
+                        console.log("peer"+neighbor);
+                    }
+                    neighbors.push(neighbor);
                 }
-                neighbors.push(neighbor);
             }
-
-            //console.log(ccone);
-            //console.log(pcone);
-            //console.log(peers);
-
+            
+            console.log(ccone);
+            console.log(pcone);
+            console.log(peers);
+            
             var c;
             while (customers.length > 0) {
                 c = customers.pop();
-                //console.log("customer"+c);
-                for (neighbor in neighborHoodStructure[c]) {
-                    if (neighborHoodStructure[asn][neighbor] == "1") {
-                        customers.push(neighbor);
+                if (typeof c !== "undefined") {
+                    console.log("customer"+c);
+                    for (neighbor in neighborHoodStructure[c]) {
+                        if (neighborHoodStructure[asn][neighbor] == "1") {
+                            if ((ccone.indexOf(neighbor) < 0) && (customers.indexOf(neighbor) < 0)) {
+                                customers.push(neighbor);
+                            }
+                        }
+                    }
+                    console.log(customers);
+                    if (ccone.indexOf(c) < 0) {
+                        ccone.push(c);
                     }
                 }
-                ccone.push(c);
             }
-
+            
             var p;
             while (providers.length > 0) {
                 p = providers.pop();
-                //console.log("provider"+p);
-                for (neighbor in neighborHoodStructure[p]) {
-                    if (neighborHoodStructure[asn][neighbor] == "-1") {
-                        providers.push(neighbor);
+                if (typeof p !== "undefined") {
+                    console.log("provider"+p);
+                    for (neighbor in neighborHoodStructure[p]) {
+                        if (neighborHoodStructure[asn][neighbor] == "-1") {
+                            if ((pcone.indexOf(neighbor) < 0) && (providers.indexOf(neighbor) < 0)) {
+                                providers.push(neighbor);
+                            }
+                        }
+                    }
+                    console.log(providers);
+                    if (pcone.indexOf(p) < 0) {
+                        pcone.push(p);
                     }
                 }
-                pcone.push(p);
             }
-
+            
             //console.log("done")
+            
+            console.log(ccone);
+            console.log(pcone);
+            console.log(peers);
 
-            //console.log(ccone);
-            //console.log(pcone);
-            //console.log(peers);
-
-
+            
             return {"customers" : ccone, "providers" : pcone, "peers" : peers, "neighbors" : neighbors};
         },
 

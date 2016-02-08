@@ -1,7 +1,8 @@
-define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React, ReactDOM, AsGraph, PolarLayout) {
+define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout', 'underscore'], function(React, ReactDOM, AsGraph, PolarLayout, _) {
 
     var Controls = React.createClass({
         render: function() {
+            return null;
             return <div style={{
                 margin: 10
                 //backgroundColor: 'lightgray',
@@ -28,6 +29,12 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                 */}
             </div>;
         }
+
+        /*_onSrcChange: _.debounce(function(event) {
+            this.props.onSrcChange(event);
+        }, 1000)*/
+
+        //debSrcUpdate: _.debounce(this.props.onSrcChange, 500)
     });
 
     var Logger = React.createClass({
@@ -59,9 +66,9 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React
                          <td><b> {asInfo.degreePeer}</b></td>
                          <td><b> {asInfo.degreeCustomer}</b></td>
                     </tr><tr>
-                         <td>provider</td>
-                         <td>peer</td>
-                         <td>customer</td>
+                         <td style={{color: 'red'}}>provider</td>
+                         <td style={{color: 'green'}}>peer</td>
+                         <td style={{color: 'blue'}}>customer</td>
                     </tr></table>
             </div>;
         }
