@@ -86,7 +86,9 @@ define(['react', 'react-dom', 'triangle-solver', 'locations'], function(React, R
                         fill='lightgrey'
                         textAnchor={Math.abs(label.angle)<90?'start':'end'}
                         transform={'rotate(' + txtRotate + ' ' + txtX + ',' + txtY + ')'}
-                        style = {{ 'alignmentBaseline': "central", fillOpacity: opacities[idx] }}
+                        style = {{
+                            alignmentBaseline: 'central',
+                            fillOpacity: opacities[idx]*.8 }}
                     >
                         {label.text}
                     </text>
