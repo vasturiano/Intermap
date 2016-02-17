@@ -164,21 +164,17 @@ define(['react', 'react-dom', 'triangle-solver', 'locations'], function(React, R
 
             var radius = Math.min(this.props.width, this.props.height)/2 - this.props.margin;
 
-            return  <svg
+            return <svg
                 width={this.props.width}
                 height={this.props.height}
                 style={{margin: 'auto', display: 'block'}}
-                >
+            >
                 <g
                     transform={'translate('
                         + (this.props.width/2) + ','
                         + (this.props.height/2) + ')'
                     }
-                    >
-                    <circlee
-                        r={radius}
-                        fill='#FAFAFA'
-                        />
+                >
                     <g
                         transform = {
                             'scale(' + (1/rThis.props.zoomRadius) + ')'
@@ -190,8 +186,10 @@ define(['react', 'react-dom', 'triangle-solver', 'locations'], function(React, R
                             nConcentricLines={Math.max(2, Math.pow(2, Math.round(Math.log(6/this.props.zoomRadius))))-1}
                             nRadialLines={Math.max(4, Math.pow(2, Math.round(Math.log(6/this.props.zoomRadius))))}
                             radius={radius}
-                            />
+                        />
                     </g>
+
+                    {/* Semi-transparent window */}
                     <circle
                         r={radius + 500}
                         stroke={this.props.bckgColor}
@@ -199,10 +197,11 @@ define(['react', 'react-dom', 'triangle-solver', 'locations'], function(React, R
                         strokeOpacity='0.7'
                         fillOpacity='0'
                     />
+                    {/* Longitude ring (1/2 margin) */}
                     <circle
-                        r={radius + this.props.margin/2}
+                        r={radius + this.props.margin/4}
                         stroke='#3182bd'
-                        strokeWidth={this.props.margin}
+                        strokeWidth={this.props.margin/2}
                         strokeOpacity='0.6'
                         fillOpacity='0'
                     />
@@ -210,7 +209,7 @@ define(['react', 'react-dom', 'triangle-solver', 'locations'], function(React, R
                     <g>
                         {this._getLongitudeLabels().map(function(label) {
                             return <DirectionMarker
-                                length={rThis.props.margin}
+                                length={rThis.props.margin/2}
                                 padding={radius}
                                 angle={label.angle}
                                 text={label.text}
@@ -218,7 +217,7 @@ define(['react', 'react-dom', 'triangle-solver', 'locations'], function(React, R
                         })}
                     </g>
                     <RadialLabels
-                        layoutRadius={radius+rThis.props.margin*1.3}
+                        layoutRadius={radius+rThis.props.margin*.65}
                         labels={locations.map(function(city) {
                             return {
                                 text: city.text,

@@ -80,7 +80,7 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout', 'underscore'], 
             return {
                 width: null, //window.innerWidth,
                 height: null, //window.innerHeight - 20,
-                layoutMargin: 15,
+                layoutMargin: 30,
 
                 offsetAngle: 0,
                 offsetRadius: 0,
@@ -146,7 +146,7 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout', 'underscore'], 
                 </div>
                 <div style={{
                     left: 0,
-                    top: this.state.height-100,
+                    top: this.state.height-120,
                     position: 'absolute'
                 }}>
                     <Logger asInfo={this.state.selectedAsInfo}/>
