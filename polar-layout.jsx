@@ -1,4 +1,4 @@
-define(['react', 'react-dom', 'd3', 'triangle-solver', 'locations'], function(React, ReactDOM, d3, solveTriangle, locations) {
+define(['react', 'react-dom', 'triangle-solver', 'locations'], function(React, ReactDOM, solveTriangle, locations) {
 
     var DirectionMarker = React.createClass({
         propTypes: {
@@ -25,15 +25,7 @@ define(['react', 'react-dom', 'd3', 'triangle-solver', 'locations'], function(Re
             while (txtRotate<-180) { txtRotate += 360; }
             txtRotate += ((txtRotate>0)?-90:90);
 
-            return <g>
-                <linee
-                    x1={this.props.padding*Math.cos(this.props.angle)}
-                    y1={this.props.padding*Math.sin(this.props.angle)}
-                    x2={(this.props.padding+this.props.length)*Math.cos(this.props.angle)}
-                    y2={(this.props.padding+this.props.length)*Math.sin(this.props.angle)}
-                    stroke='grey'
-                    />
-                <text
+            return <text
                     x={txtX}
                     y={txtY}
                     fontSize={this.props.length*.6}
@@ -42,7 +34,63 @@ define(['react', 'react-dom', 'd3', 'triangle-solver', 'locations'], function(Re
                     textAnchor="middle"
                     transform={'rotate(' + txtRotate + ' ' + txtX + ',' + txtY + ')'}
                     style = {{ 'alignmentBaseline': "central" }}
-                    >{this.props.text}</text>
+                >
+                    {this.props.text}
+                </text>;
+        }
+    });
+
+    var RadialLabels = React.createClass({
+
+        const: {
+            TEXT_HEIGHT_RADIUS_RATIO: 0.025
+        },
+
+        propTypes: {
+            layoutRadius: React.PropTypes.number.isRequired
+        },
+
+        render: function() {
+
+            var props = this.props,
+                textHeight = this.const.TEXT_HEIGHT_RADIUS_RATIO*this.props.layoutRadius,
+                textHeightInAngles = Math.atan(textHeight/this.props.layoutRadius)*180/Math.PI, // Small-angle approx
+                anglesCarry = [],
+                opacities = [];
+
+            this.props.labels.forEach(function(label) {
+                var closestAngle = anglesCarry.reduce(function(carry, angleCarry) {
+                    return Math.min(carry, Math.abs(label.angle-angleCarry));
+                }, Infinity);
+
+                anglesCarry.push(label.angle);
+                opacities.push(Math.pow(Math.min(1,closestAngle/textHeightInAngles), 6)); // Exponential fade
+            });
+
+            return <g>
+                {this.props.labels.map(function(label, idx) {
+
+                    // Normalize angle
+                    while (label.angle>=180) { label.angle -= 360; }
+                    while (label.angle<-180) { label.angle += 360; }
+
+                    var txtX = props.layoutRadius*Math.cos(label.angle*Math.PI/180),
+                        txtY = props.layoutRadius*Math.sin(label.angle*Math.PI/180),
+                        txtRotate = label.angle + ((Math.abs(label.angle)<90)?0:180);
+
+                    return <text
+                        x={txtX}
+                        y={txtY}
+                        fontSize={textHeight}
+                        fontFamily="Sans-serif"
+                        fill='lightgrey'
+                        textAnchor={Math.abs(label.angle)<90?'start':'end'}
+                        transform={'rotate(' + txtRotate + ' ' + txtX + ',' + txtY + ')'}
+                        style = {{ 'alignmentBaseline': "central", fillOpacity: opacities[idx] }}
+                    >
+                        {label.text}
+                    </text>
+                })}
             </g>;
         }
     });
@@ -109,17 +157,6 @@ define(['react', 'react-dom', 'd3', 'triangle-solver', 'locations'], function(Re
             }
         },
 
-        componentDidMount: function() {
-            /*var canvas = d3.select(ReactDOM.findDOMNode(this));
-
-             canvas.append('circle')
-             .attr('r', this.props.radius)
-             .style({
-             fill: 'blue'
-             });
-             */
-        },
-
         render: function() {
             var rThis = this;
 
@@ -169,7 +206,7 @@ define(['react', 'react-dom', 'd3', 'triangle-solver', 'locations'], function(Re
                     />
 
                     <g>
-                        {this._getRadialLabels().map(function(label) {
+                        {this._getLongitudeLabels().map(function(label) {
                             return <DirectionMarker
                                 length={rThis.props.margin}
                                 padding={radius}
@@ -178,81 +215,50 @@ define(['react', 'react-dom', 'd3', 'triangle-solver', 'locations'], function(Re
                             />
                         })}
                     </g>
+                    <RadialLabels
+                        layoutRadius={radius+rThis.props.margin*1.3}
+                        labels={locations.map(function(city) {
+                            return {
+                                text: city.text,
+                                angle: rThis._getProjectedAngle(city.angle)
+                            }
+                        })}
+                    />
                 </g>
             </svg>;
         },
 
-        _getRadialLabels: function() {
-
-            var rThis = this;
-
-            var longCoords = [0, 45, 90, 135, 180, -45, -90, -135];
-
-            function getProjectedAngle(angle) {
-                if (!rThis.props.zoomCenter[0]) return -angle; // Right in the center, direct projection
-
-                var knownAngle = rThis.props.zoomCenter[1] - angle;
-                while(knownAngle>180) knownAngle-=360;
-                while(knownAngle<-180) knownAngle+=360;
-
-                var neg = knownAngle < 0;
-                knownAngle = Math.abs(knownAngle);
-
-                if (knownAngle == 0 || knownAngle==180) return angle; // Zooming in the exact direction of the angle
-
-                // known angle A, side B (full radius=1), side C (zoom radius)
-                var res = solveTriangle(null, rThis.props.zoomCenter[0], 1, knownAngle, null, null);
-                return (180 - res[5])*(neg?-1:1) - rThis.props.zoomCenter[1]; // Use angle C
-            }
-
-            function filterLabels(labels, charRatio) {
-
-            }
-
-            var labels = [];
-
-            /*
-            var cardinalPoints = {
-                S: -90,
-                SE: -45,
-                E: 0,
-                NE: 45,
-                N: 90,
-                NW: 135,
-                W: 180,
-                SW: -135
-            };
-            labels.push.apply(labels, Object.keys(cardinalPoints).map(
-                function(cardPnt) {
-                    return {
-                        text: cardPnt,
-                        angle: getProjectedAngle(cardinalPoints[cardPnt])*Math.PI/180
-                    };
-                })
-            );
-            */
-
-            /*
-            labels.push.apply(labels, locations.map(
-                function(loc) {
-                    return {
-                        text: loc.text,
-                        angle: getProjectedAngle(loc.angle)*Math.PI/180
-                    };
-                })
-            );*/
-
+        _getLongitudeLabels: function() {
+            var rThis = this,
+                longCoords = [0, 45, 90, 135, 180, -45, -90, -135],
+                labels = [];
 
             labels.push.apply(labels, longCoords.map(function(longCoord) {
                     return {
                         text: longCoord + "°",
-                        angle: getProjectedAngle(longCoord)*Math.PI/180
+                        angle: rThis._getProjectedAngle(longCoord)*Math.PI/180
                     };
                 })
             );
 
-
             return labels;
+        },
+
+        _getProjectedAngle: function(angle) {
+            if (!this.props.zoomCenter[0]) return -angle; // Right in the center, direct projection
+
+            var knownAngle = this.props.zoomCenter[1] - angle;
+            while(knownAngle>180) knownAngle-=360;
+            while(knownAngle<-180) knownAngle+=360;
+
+            var neg = knownAngle < 0;
+            knownAngle = Math.abs(knownAngle);
+
+            if (knownAngle == 0 || knownAngle==180) return angle; // Zooming in the exact direction of the angle
+
+            // known angle A, side B (full radius=1), side C (zoom radius)
+            var res = solveTriangle(null, this.props.zoomCenter[0], 1, knownAngle, null, null);
+            return (180 - res[5])*(neg?-1:1) - this.props.zoomCenter[1]; // Use angle C
         }
     });
 

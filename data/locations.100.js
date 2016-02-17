@@ -1,4 +1,4 @@
-defined([], function {
+define([], function() {
     return[
    {
       "population" : "417910",
