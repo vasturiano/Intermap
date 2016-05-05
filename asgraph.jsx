@@ -10,43 +10,10 @@ define([
 
     panzoom(cytoscape, $); // Register panzoom
 
-    function graphRandomGenerator(nNodes, nEdges) {
-        var nodes = [],
-            edges = [];
-
-        nNodes = Math.max(nNodes, 1);
-        nEdges = Math.abs(nEdges);
-
-        while(nEdges--) {
-            edges.push({
-                src: Math.round((nNodes-1)*Math.random()),
-                dst: Math.round((nNodes-1)*Math.random()),
-                type: 'peer'
-            });
-        }
-        while(nNodes--) {
-            nodes.push({
-                asn: nNodes,
-                customerConeSize: Math.random(),
-                lat: Math.random()*180 - 90,
-                lon: Math.random()*360 - 180,
-                orgName: 'bla'
-                //x: Math.random(),
-                //y: Math.random()
-            });
-        }
-
-        //console.log('finished random gen');
-        return {
-            ases: nodes,
-            relationships: edges
-        }
-    }
-
     var CytoscapeGraph = React.createClass({
 
         const: {
-            REFRESH_STYLE_FREQ: 400, // ms
+            REFRESH_STYLE_PAUSE: 400, // ms
             MIN_EDGE_WIDTH: 0.15,
             MAX_EDGE_WIDTH: 0.25,
             NODE_SIZE: 2
@@ -55,13 +22,6 @@ define([
         componentDidMount: function() {
             var props = this.props,
                 consts = this.const;
-            var size_max = 1;
-            for (var i = 0; i < props.edges.length; i++) {
-                var size = props.edges[i]["customerConeSize"];
-                if (size != null) {
-                    size_max = size;
-                }
-            }
 
             var cs = this._csGraph = cytoscape({
                 container: ReactDOM.findDOMNode(this),
@@ -86,7 +46,7 @@ define([
                             'border-width': this.const.NODE_SIZE*.1,
                             'border-color': 'orange',
                             'background-color': 'yellow',
-                            'background-opacity': .3, //.2,
+                            'background-opacity': .3
 
                             //'content': 'data(name)',
                             //'font-size': '11px',
@@ -97,23 +57,20 @@ define([
                     {
                         selector: 'edge',
                         style: {
-                            'curve-style': 'haystack', // 'bezier', //'haystack',
+                            'curve-style': 'haystack', // 'bezier'
                             width: .05,
-                            'opacity': function (ele) { 
-                                return ele.data('opacity')},
-                            'line-color': function (ele) { 
-                                return ele.data('color') }
+                            opacity: function (el) { return el.data('opacity'); },
+                            'line-color': function (el) { return el.data('color'); }
+
                             //'target-arrow-shape': 'triangle',
                             //'overlay-color': '#c0c0c0',
                             //'overlay-padding': '2px',
                             //'overlay-opacity': 40
-
                         }
                     }
                 ],
                 elements: {
                     nodes: props.nodes.map(function(node) {
-                        var nodeData = $.extend({id: node.id}, node.nodeData);
                         return {
                             data: $.extend({id: node.id}, node.nodeData),
                             position : {
@@ -127,8 +84,8 @@ define([
                             data: {
                                 source: edge.src,
                                 target: edge.dst,
-                                color: Colors.valueRgb(edge.customerConeSize, size_max),
-                                opacity: Colors.valueOpacity(edge.customerConeSize, size_max)
+                                color: edge.color || 'lightgrey',
+                                opacity: edge.opacity || 1
                             }
                         };
                     })
@@ -146,8 +103,6 @@ define([
                     props.onNodeClick(this.data());
                 });
 
-            // console.log('cytoscape add nodes/edges');
-
             cs.panzoom({
                 zoomFactor: 0.1, // zoom factor per zoom tick
                 zoomDelay: 50, // how many ms between zoom ticks
@@ -163,7 +118,7 @@ define([
                 props.onZoomOrPan(cs.zoom(), pan.x, pan.y);
             }
 
-            var adjustElementSizes = _.debounce(this.resetStyle, consts.REFRESH_STYLE_FREQ);
+            var adjustElementSizes = _.debounce(this.resetStyle, consts.REFRESH_STYLE_PAUSE);
         },
 
         componentWillReceiveProps: function(nextProps) {
@@ -216,18 +171,16 @@ define([
                 nodeSize = this.const.NODE_SIZE/zoom;
             cs.style()
                 .selector('node')
-                .style({
-                    width: nodeSize,
-                    height: nodeSize,
-                    'border-width': this.const.NODE_SIZE*.1,
-                    'border-color': 'orange',
-                    'background-color': 'yellow',
-                    'background-opacity': .3, //.2,
-                })
+                    .style({
+                        width: nodeSize,
+                        height: nodeSize,
+                        'background-color': 'yellow',
+                        'background-opacity': .3
+                    })
                 .selector('edge')
-                .style({
-                    width: Math.min(this.const.MIN_EDGE_WIDTH*zoom, this.const.MAX_EDGE_WIDTH)/zoom
-                })
+                    .style({
+                        width: Math.min(this.const.MIN_EDGE_WIDTH*zoom, this.const.MAX_EDGE_WIDTH)/zoom
+                    })
                 .update();
         }
 
@@ -247,11 +200,9 @@ define([
 
         getInitialState: function() {
             return {
-                maxCustomerConeSize: Math.max.apply(null, this.props.graphData.ases.map(function(asNode) {
-                    return asNode.customerConeSize
-                })),
                 radialNodes: this._genRadialNodes(),
-                asnNeighborhood: this._genNeighborhoodStructure()
+                edges: this._getEdges()
+                //asnNeighborhood: this._genNeighborhoodStructure()
             }
         },
 
@@ -276,7 +227,7 @@ define([
             return <CytoscapeGraph
                 ref="radialGraph"
                 nodes={this.state.radialNodes}
-                edges={this.props.graphData.relationships}
+                edges={this.state.edges}
                 width={this.props.width}
                 height={this.props.height}
                 onZoomOrPan={this._onZoomOrPan}
@@ -289,8 +240,6 @@ define([
             var neighborHood = this._getBgpNeighborhood(this.props.selectedAs),
                 graph = this.refs.radialGraph,
                 csGraph = graph._csGraph;
-
-            console.log(neighborHood);
 
             var COLORS = {
                 self: 'yellow',
@@ -332,7 +281,7 @@ define([
             var maxR = Math.min(this.props.width, this.props.height) / 2 - this.props.margin;
 
             var maxConeSize = Math.max.apply(null, this.props.graphData.ases.map(function(asNode) {
-                return asNode.customerConeSize
+                return asNode.customerConeSize;
             }));
 
             return this.props.graphData.ases.map(function(node) {
@@ -346,6 +295,21 @@ define([
             });
         },
 
+        _getEdges: function() {
+            var maxConeSize = Math.max.apply(null, this.props.graphData.ases.map(function(asNode) {
+                return asNode.customerConeSize;
+            }));
+
+            return this.props.graphData.relationships.map(function(rel) {
+                return {
+                    src: rel.src,
+                    dst: rel.dst,
+                    color: Colors.valueRgb(rel.customerConeSize, maxConeSize),
+                    opacity: Colors.valueOpacity(rel.customerConeSize, maxConeSize)
+                }
+            });
+        },
+
         _getRadius: function(coneSize, maxConeSize) {
             // 0<=result<=1
             return (Math.log(maxConeSize)-Math.log(coneSize)) / (Math.log(maxConeSize) - Math.log(1))*0.99 + 0.01;
@@ -354,9 +318,7 @@ define([
         _genNeighborhoodStructure: function() {
             var graph = this.props.graphData;
             var to_return = {};
-            
-            //console.log(Object.keys(graph).length);
-            
+
             for (var i = 0; i < graph["relationships"].length; i++) {
                 var rel = graph["relationships"][i];
                 if (!(rel["src"] in to_return)) {
@@ -381,8 +343,7 @@ define([
         },
 
         _getBgpNeighborhood: function(asn) {
-            var graph = this.props.graphData,
-                neighborHoodStructure = this.state.asnNeighborhood;
+            var neighborHoodStructure = this.state.asnNeighborhood;
 
             var ccone     = [];
             var pcone     = [];
@@ -393,38 +354,26 @@ define([
             
             var neighbors = [];
             
-            console.log(asn);
-            
-            console.log(neighborHoodStructure[asn]);
-            
             var neighbor;
             for (neighbor in neighborHoodStructure[asn]) {
                 if (typeof neighbor !== "undefined") {
                     if (neighborHoodStructure[asn][neighbor] == "1") {
                         customers.push(neighbor);
                         ccone.push(neighbor);
-                        console.log("customer"+neighbor);
                     } else if (neighborHoodStructure[asn][neighbor] == "-1") {
                         providers.push(neighbor);
                         pcone.push(neighbor);
-                        console.log("provider"+neighbor);
                     } else if (neighborHoodStructure[asn][neighbor] == "0") {
                         peers.push(neighbor);
-                        console.log("peer"+neighbor);
                     }
                     neighbors.push(neighbor);
                 }
             }
             
-            console.log(ccone);
-            console.log(pcone);
-            console.log(peers);
-            
             var c;
             while (customers.length > 0) {
                 c = customers.pop();
                 if (typeof c !== "undefined") {
-                    console.log("customer"+c);
                     for (neighbor in neighborHoodStructure[c]) {
                         if (neighborHoodStructure[asn][neighbor] == "1") {
                             if ((ccone.indexOf(neighbor) < 0) && (customers.indexOf(neighbor) < 0)) {
@@ -432,7 +381,6 @@ define([
                             }
                         }
                     }
-                    console.log(customers);
                     if (ccone.indexOf(c) < 0) {
                         ccone.push(c);
                     }
@@ -443,7 +391,6 @@ define([
             while (providers.length > 0) {
                 p = providers.pop();
                 if (typeof p !== "undefined") {
-                    console.log("provider"+p);
                     for (neighbor in neighborHoodStructure[p]) {
                         if (neighborHoodStructure[asn][neighbor] == "-1") {
                             if ((pcone.indexOf(neighbor) < 0) && (providers.indexOf(neighbor) < 0)) {
@@ -451,19 +398,11 @@ define([
                             }
                         }
                     }
-                    console.log(providers);
                     if (pcone.indexOf(p) < 0) {
                         pcone.push(p);
                     }
                 }
             }
-            
-            //console.log("done")
-            
-            console.log(ccone);
-            console.log(pcone);
-            console.log(peers);
-
             
             return {"customers" : ccone, "providers" : pcone, "peers" : peers, "neighbors" : neighbors};
         },
@@ -486,3 +425,37 @@ define([
     });
 
 });
+
+////
+
+function graphRandomGenerator(nNodes, nEdges) {
+    var nodes = [],
+        edges = [];
+
+    nNodes = Math.max(nNodes, 1);
+    nEdges = Math.abs(nEdges);
+
+    while(nEdges--) {
+        edges.push({
+            src: Math.round((nNodes-1)*Math.random()),
+            dst: Math.round((nNodes-1)*Math.random()),
+            type: 'peer'
+        });
+    }
+    while(nNodes--) {
+        nodes.push({
+            asn: nNodes,
+            customerConeSize: Math.random(),
+            lat: Math.random()*180 - 90,
+            lon: Math.random()*360 - 180
+            //x: Math.random(),
+            //y: Math.random()
+        });
+    }
+
+    //console.log('finished random gen');
+    return {
+        ases: nodes,
+        relationships: edges
+    }
+}
