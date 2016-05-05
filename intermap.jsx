@@ -1,40 +1,24 @@
-define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout', 'underscore'], function(React, ReactDOM, AsGraph, PolarLayout, _) {
+define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout'], function(React, ReactDOM, AsGraph, PolarLayout, _) {
 
     var Controls = React.createClass({
         render: function() {
             return null;
             return <div style={{
                 margin: 10
-                //backgroundColor: 'lightgray',
-                //padding: 5,
-                //borderRadius: 5
             }}>
-                {/*Radius: <b>{this.props.radius}</b><br/>
-                //Angle: <b>{this.props.angle}</b><br/>
-                Zoom R: <b>{this.props.zoomRadius}</b><br/>*/}
+                this.props.search
                 <input type="text"
                     size="20"
-                    value={this.props.src}
-                    placeholder="Search for AS"
-                    onChange={this.props.onSrcChange}
+                    value={this.props.search}
+                    placeholder="Search for an AS"
+                    onChange={this._handleSearchUpdate}
                 />
-                {/*
-                &nbsp;
-                Dst node:
-                <input type="text"
-                    size="6"
-                    value={this.props.dst}
-                    onChange={this.props.onDstChange}
-                />
-                */}
             </div>;
+        },
+
+        _handleSearchUpdate: function(event) {
+            this.props.onSearchChange(event.target.value);
         }
-
-        /*_onSrcChange: _.debounce(function(event) {
-            this.props.onSrcChange(event);
-        }, 1000)*/
-
-        //debSrcUpdate: _.debounce(this.props.onSrcChange, 500)
     });
 
     var Logger = React.createClass({
@@ -135,13 +119,8 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout', 'underscore'], 
                     position: 'absolute'
                 }}>
                     <Controls
-                        radius={this.state.offsetRadius}
-                        angle={this.state.offsetAngle}
-                        zoomRadius={this.state.zoomRadius}
-                        src={this.state.srcHighlight}
-                        dst={this.state.dstHighlight}
-                        onSrcChange={this._onSrcChange}
-                        onDstChange={this._onDstChange}
+                        search={this.state.srcHighlight}
+                        onSearchChange={this._onSrcChange}
                     />
                 </div>
                 <div style={{
@@ -169,12 +148,8 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout', 'underscore'], 
             this.setState({srcHighlight: asInfo.id});
         },
 
-        _onSrcChange: function(event) {
-            this.setState({srcHighlight: event.target.value});
-        },
-
-        _onDstChange: function(event) {
-            this.setState({dstHighlight: event.target.value});
+        _onSrcChange: function(src) {
+            this.setState({srcHighlight: src});
         },
 
         _onRadialViewportChange: function(zoom, offsetR, offsetAngle) {
@@ -183,9 +158,6 @@ define(['react', 'react-dom', 'jsx!asgraph', 'jsx!polar-layout', 'underscore'], 
                 offsetAngle: offsetAngle,
                 zoomRadius: zoom
             });
-
         }
-
     });
-
 });
