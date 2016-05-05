@@ -4,12 +4,10 @@ define([
     'jquery',
     'underscore',
     'cytoscape',
-    'cytoscape-panzoom',
-    'cytoscape-qtip'
-], function(React, ReactDOM, $, _, cytoscape, panzoom, qtip) {
+    'cytoscape-panzoom'
+], function(React, ReactDOM, $, _, cytoscape, panzoom) {
 
     panzoom(cytoscape, $); // Register panzoom
-    qtip(cytoscape, $); // Register qtip
 
     function graphRandomGenerator(nNodes, nEdges) {
         var nodes = [],
@@ -158,8 +156,6 @@ define([
                 panSpeed: 20, // how many ms in between pan ticks
                 panDistance: 40 // max pan distance per tick
             });
-
-            //cs.qtip();
 
             function zoomOrPan() {
                 var pan = cs.pan();
