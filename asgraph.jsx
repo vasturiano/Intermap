@@ -47,11 +47,6 @@ define([
                             'border-color': 'orange',
                             'background-color': 'yellow',
                             'background-opacity': .3
-
-                            //'content': 'data(name)',
-                            //'font-size': '11px',
-                            //'font-weight': 'bold',
-                            //'color': '#337AB7'
                         }
                     },
                     {
@@ -61,11 +56,6 @@ define([
                             width: .05,
                             opacity: function (el) { return el.data('opacity'); },
                             'line-color': function (el) { return el.data('color'); }
-
-                            //'target-arrow-shape': 'triangle',
-                            //'overlay-color': '#c0c0c0',
-                            //'overlay-padding': '2px',
-                            //'overlay-opacity': 40
                         }
                     }
                 ],
@@ -119,34 +109,6 @@ define([
             }
 
             var adjustElementSizes = _.debounce(this.resetStyle, consts.REFRESH_STYLE_PAUSE);
-        },
-
-        componentWillReceiveProps: function(nextProps) {
-            /*if (nextProps.nodes !== this.props.nodes) {
-                this._csGraph.add(this.props.nodes.map(function(node, idx) {
-                    return {
-                        data: {
-                            id: idx
-                        },
-                        position : {
-                            x: node.x,
-                            y: node.y
-                        }
-                    };
-                }));
-            }
-            if (nextProps.edges !== this.props.edges) {
-                this._csGraph.add(this.props.edges.map(function(edge) {
-                    return {
-                        data: {
-                            source: edge.src,
-                            target: edge.dst
-                        }
-                    };
-                }));
-            }*/
-
-
         },
 
         render: function() {
